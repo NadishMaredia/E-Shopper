@@ -9,19 +9,27 @@ namespace EShop.Web.Services
     public class BaseService : IBaseService
     {
         private readonly IHttpClientFactory httpClientFactory;
+		private readonly ITokenProvider tokenProvider;
 
-        public BaseService(IHttpClientFactory httpClientFactory)
-        {
-            this.httpClientFactory = httpClientFactory;
-        }
+		public BaseService(IHttpClientFactory httpClientFactory, ITokenProvider tokenProvider = null)
+		{
+			this.httpClientFactory = httpClientFactory;
+			this.tokenProvider = tokenProvider;
+		}
 
-        public async Task<ResponseDto?> SendAsync(RequestDto requestDto)
+		public async Task<ResponseDto?> SendAsync(RequestDto requestDto, bool withBearer = true)
         {
             try
             {
                 HttpClient client = httpClientFactory.CreateClient("EShopAPI");
                 HttpRequestMessage message = new();
                 message.Headers.Add("Accept", "application/json");
+
+                if(withBearer)
+                {
+                    var token = tokenProvider.GetToken();
+                    message.Headers.Add("Authorization", $"Bearer {token}");
+                }
 
                 message.RequestUri = new Uri(requestDto.Url);
                 if (requestDto.Data != null)

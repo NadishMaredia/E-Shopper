@@ -49,7 +49,8 @@ namespace EShop.Services.AuthAPI.Services
 				};
 			}
 
-			var token = _jwtTokenGenerator.GenerateToken(user);
+			var roles = await userManager.GetRolesAsync(user);
+			var token = _jwtTokenGenerator.GenerateToken(user, roles);
 
 			UserDto userDto = new()
 			{

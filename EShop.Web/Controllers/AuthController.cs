@@ -97,9 +97,11 @@ namespace EShop.Web.Controllers
             return View(obj);
         }
         [HttpGet]
-        public IActionResult logout()
+        public async Task<IActionResult> logout()
         {
-            return View();
+            await HttpContext.SignOutAsync();
+            tokenProvider.clearToken();
+            return RedirectToAction("Index", "Home");
         }
 
         private async Task SignInUser(LoginResponseDto model)
@@ -111,6 +113,7 @@ namespace EShop.Web.Controllers
             identity.AddClaim(new Claim(JwtRegisteredClaimNames.Sub, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Sub).Value));
             identity.AddClaim(new Claim(JwtRegisteredClaimNames.Name, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Name).Value));
             identity.AddClaim(new Claim(ClaimTypes.Name, jwt.Claims.FirstOrDefault(u => u.Type == JwtRegisteredClaimNames.Email).Value));
+            identity.AddClaim(new Claim(ClaimTypes.Role, jwt.Claims.FirstOrDefault(u => u.Type == "role").Value));
 
             var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
