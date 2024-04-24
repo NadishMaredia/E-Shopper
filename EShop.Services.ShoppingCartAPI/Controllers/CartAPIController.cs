@@ -166,7 +166,7 @@ namespace EShop.Services.ShoppingCartAPI.Controllers
         }
 
         [HttpPost("RemoveCoupon")]
-        public async Task<object> RemoveCoupon([FromBody] CartDto cartDto)
+        public async Task<ResponseDto> RemoveCoupon([FromBody] CartDto cartDto)
         {
             try
             {
