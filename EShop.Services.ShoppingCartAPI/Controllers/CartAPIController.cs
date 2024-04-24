@@ -18,13 +18,15 @@ namespace EShop.Services.ShoppingCartAPI.Controllers
         private IMapper mapper;
         private readonly AppDbContext db;
         private readonly IProductService productService;
+        private readonly ICouponService couponService;
 
-        public CartAPIController(IMapper mapper, AppDbContext db, IProductService productService)
+        public CartAPIController(IMapper mapper, AppDbContext db, IProductService productService, ICouponService couponService)
         {
             this.mapper = mapper;
             this.db = db;
             responseDto = new ResponseDto();
             this.productService = productService;
+            this.couponService = couponService;
         }
         [HttpPost("CartUpsert")]
         public async Task<ResponseDto> CartUpsert(CartDto cartDto)
@@ -121,6 +123,16 @@ namespace EShop.Services.ShoppingCartAPI.Controllers
                 {
                     item.Product = productDtos.FirstOrDefault(u => u.ProductId == item.ProductId);
                     cartDto.CartHeader.CartTotal += (item.Count * item.Product.Price);
+                }
+
+                if(!string.IsNullOrEmpty(cartDto.CartHeader.CouponCode))
+                {
+                    CouponDto coupon = await couponService.GetCoupon(cartDto.CartHeader.CouponCode);
+                    if(coupon != null && cartDto.CartHeader.CartTotal > coupon.MinAmount)
+                    {
+                        cartDto.CartHeader.CartTotal -= coupon.DiscountAmount;
+                        cartDto.CartHeader.Discount = coupon.DiscountAmount;
+                    }
                 }
 
                 responseDto.Result = cartDto;
