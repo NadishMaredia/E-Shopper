@@ -32,5 +32,28 @@ namespace EShop.Web.Controllers
             }
             return new CartDto();
         }
+        [HttpPost]
+        public async Task<IActionResult> RemoveCoupon(CartDto cartDto)
+        {
+            cartDto.CartHeader.CouponCode = "";
+            ResponseDto? response = await cartService.ApplyCouponAsync(cartDto);
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Cart update successfully!";
+                return RedirectToAction(nameof(CartIndex));
+            }
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> ApplyCoupon(CartDto cartDto)
+        {
+            ResponseDto? response = await cartService.ApplyCouponAsync(cartDto);
+            if (response != null && response.IsSuccess)
+            {
+                TempData["success"] = "Coupon added successfully!";
+                return RedirectToAction(nameof(CartIndex));
+            }
+            return View();
+        }
     }
 }
