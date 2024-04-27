@@ -1,9 +1,6 @@
 using AutoMapper;
-using EShop.Services.ShoppingCartAPI;
-using EShop.Services.ShoppingCartAPI.Data;
-using EShop.Services.ShoppingCartAPI.Services;
-using EShop.Services.ShoppingCartAPI.Services.IService;
-using EShop.Services.ShoppingCartAPI.Utility;
+using EShop.Services.OrderAPI;
+using EShop.Services.OrderAPI.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -24,12 +21,7 @@ builder.Services.AddSingleton(mapper);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<ICouponService, CouponService>();
-
-
 builder.Services.AddHttpClient("Product", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]));
-builder.Services.AddHttpClient("Coupon", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:CouponAPI"]));
 
 builder.Services.AddControllers();
 
