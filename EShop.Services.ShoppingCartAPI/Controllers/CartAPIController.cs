@@ -53,7 +53,7 @@ namespace EShop.Services.ShoppingCartAPI.Controllers
 
                     if(cartDetailsFromDb == null)
                     {
-                        cartDto.CartDetails.First().CartHeaderId = cartDetailsFromDb.CartHeaderId;
+                        cartDto.CartDetails.First().CartHeaderId = cartHeaderFromDb.CartHeaderId;
                         db.CartDetails.Add(mapper.Map<CartDetails>(cartDto.CartDetails.First()));
                         await db.SaveChangesAsync();
                     } 
