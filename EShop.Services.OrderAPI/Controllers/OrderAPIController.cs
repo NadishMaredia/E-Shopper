@@ -3,6 +3,7 @@ using Azure;
 using EShop.Services.OrderAPI.Data;
 using EShop.Services.OrderAPI.Models;
 using EShop.Services.OrderAPI.Models.Dto;
+using EShop.Services.OrderAPI.Services.IService;
 using EShop.Services.OrderAPI.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,12 +18,14 @@ namespace EShop.Services.OrderAPI.Controllers
         protected ResponseDto responseDto;
         private readonly AppDbContext db;
         private IMapper mapper;
+        private ICartService cartService;
 
-        public OrderAPIController(AppDbContext db, IMapper mapper)
+        public OrderAPIController(AppDbContext db, IMapper mapper, ICartService cartService = null)
         {
             this.db = db;
             responseDto = new ResponseDto();
             this.mapper = mapper;
+            this.cartService = cartService;
         }
 
         [HttpGet]
@@ -78,6 +81,8 @@ namespace EShop.Services.OrderAPI.Controllers
 
                 OrderHeader orderCreated = db.OrderHeaders.Add(mapper.Map<OrderHeader>(orderHeaderDto)).Entity;
                 await db.SaveChangesAsync();
+
+                await cartService.UpdateCartStatus(cartDto.CartHeader.CartHeaderId);
 
                 orderHeaderDto.OrderHeaderId = orderCreated.OrderHeaderId;
                 responseDto.Result = orderHeaderDto;

@@ -1,6 +1,8 @@
 using AutoMapper;
 using EShop.Services.OrderAPI;
 using EShop.Services.OrderAPI.Data;
+using EShop.Services.OrderAPI.Services;
+using EShop.Services.OrderAPI.Services.IService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -22,6 +24,9 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
 builder.Services.AddHttpClient("Product", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ProductAPI"]));
+builder.Services.AddHttpClient("Cart", u => u.BaseAddress = new Uri(builder.Configuration["ServiceUrls:ShoppingCartAPI"]));
+
+builder.Services.AddScoped<ICartService, CartService>();
 
 builder.Services.AddControllers();
 

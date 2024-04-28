@@ -3,6 +3,7 @@ using EShop.Services.ShoppingCartAPI.Data;
 using EShop.Services.ShoppingCartAPI.Models;
 using EShop.Services.ShoppingCartAPI.Models.Dto;
 using EShop.Services.ShoppingCartAPI.Services.IService;
+using EShop.Services.ShoppingCartAPI.Utility;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -33,10 +34,11 @@ namespace EShop.Services.ShoppingCartAPI.Controllers
         {
             try
             {
-                var cartHeaderFromDb = await db.CartHeaders.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == cartDto.CartHeader.UserId);
+                var cartHeaderFromDb = await db.CartHeaders.AsNoTracking().FirstOrDefaultAsync(u => u.UserId == cartDto.CartHeader.UserId && u.Status == SD.Status_Pending);
                 if(cartHeaderFromDb == null)
                 {
                     CartHeader cartHeader = mapper.Map<CartHeader>(cartDto.CartHeader);
+                    cartHeader.Status = SD.Status_Pending;
                     db.CartHeaders.Add(cartHeader);
                     await db.SaveChangesAsync();
 
@@ -112,7 +114,7 @@ namespace EShop.Services.ShoppingCartAPI.Controllers
             {
                 CartDto cartDto = new()
                 {
-                    CartHeader = mapper.Map<CartHeaderDto>(db.CartHeaders.First(u => u.UserId == userId))
+                    CartHeader = mapper.Map<CartHeaderDto>(db.CartHeaders.First(u => u.UserId == userId && u.Status == SD.Status_Pending))
                 };
 
                 cartDto.CartDetails = mapper.Map<IEnumerable<CartDetailsDto>>(db.CartDetails.Where(u => u.CartHeaderId == cartDto.CartHeader.CartHeaderId));
@@ -185,5 +187,25 @@ namespace EShop.Services.ShoppingCartAPI.Controllers
             return responseDto;
         }
 
+        [HttpGet("UpdateCartStatus/{cartHeaderId}")]
+        public async Task<ResponseDto> UpdateCartStatus(int cartHeaderId)
+        {
+            try
+            {
+                CartHeader cartHeader = db.CartHeaders.First(u => u.CartHeaderId == cartHeaderId);
+                cartHeader.Status = SD.Status_Placed;
+                db.CartHeaders.Update(cartHeader);
+                await db.SaveChangesAsync();
+
+                responseDto.Result = true;
+                responseDto.Message = "Cart Status updated";
+            }
+            catch(Exception ex)
+            {
+                responseDto.IsSuccess = false;
+                responseDto.Message = ex.Message;
+            }
+            return responseDto;
+        }
     }
 }
